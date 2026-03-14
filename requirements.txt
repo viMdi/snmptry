@@ -1,0 +1,3 @@
+pymysql
+easysnmp
+python-dotenv

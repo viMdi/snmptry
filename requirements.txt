@@ -1,3 +1,2 @@
 pymysql
-easysnmp
 python-dotenv

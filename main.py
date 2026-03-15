@@ -1,32 +1,26 @@
-from config import DB_CONFIG, SNMP_COMMUNITY_RO, SNMP_COMMUNITY_RW, SNMP_VERSION
 from snmp_client import SnmpSession
+from config import SNMP_COMMUNITY_RO, SNMP_VERSION
 
-
-def test_snmp_connection(host, port):
-    print(f"\nТестируем SNMP к {host}... и проверяем порт {port}")
+def test_basic_connection(host):
+    print(f"\nТестируем базовое SNMP к {host}...")
 
     snmp = SnmpSession(host, SNMP_COMMUNITY_RO, SNMP_VERSION)
 
-    sys_descr = snmp.get(".1.3.6.1.2.1.1.1.0")  # описание устройства
-    status_link = snmp.get_port_status(port)
-    mac_fdb = snmp.get_port_mac(port)
+    # пробуем несколько базовых OID
+    oids = [
+        (".1.3.6.1.2.1.1.1.0", "sysDescr"),
+        (".1.3.6.1.2.1.1.5.0", "sysName"),
+        (".1.3.6.1.2.1.1.4.0", "sysContact"),
+        (".1.3.6.1.2.1.1.6.0", "sysLocation"),
+    ]
 
-    status_txt = "up" if status_link == "1" else "down" if status_link == "2" else "unknown"
+    for oid, name in oids:
+        value = snmp.get(oid)
+        print(f"  {name}: {value}")
 
-    if sys_descr:
-        print(f"  Name sw: {sys_descr}")
-        print(f"  Link status: {status_txt}")
-        print(f"  Mac on port: {mac_fdb}")
-        return True
-    else:
-        print("  Не удалось подключиться по SNMP")
-        return False
-
-
-def main():
-    print("Snmp diaga statr")
-    test_snmp_connection("10.134.128.178", 5)
-
+    # проверим порт
+    port_status = snmp.get_port_status(5)
+    print(f"  Port 5 status: {port_status}")
 
 if __name__ == "__main__":
-    main()
+    test_basic_connection("10.134.128.178")
